@@ -1,0 +1,67 @@
+/*
+Example 1:
+
+@font-face {
+    font-family: 'Onest';
+    font-weight: 400;
+    src: url(./../../fonts/OnestRegular1602.woff) format('woff');
+}
+@font-face {
+    font-family: 'Onest';
+    font-weight: 500;
+    src: url(./../../fonts/OnestMedium1602.woff) format('woff');
+}
+@font-face {
+    font-family: 'Onest';
+    font-weight: 700;
+    src: url(./../../fonts/OnestBold1602.woff) format('woff');
+}
+
+------------------------------------------------------------------
+
+EXAMPLE 2:
+
+@font-face {
+    font-family: 'Avenir Next';
+    font-style: normal;
+    font-weight: 400;
+    src: 
+        local('Avenir Next Regular'),
+        url('./../../fonts/AvenirNextCyr-Regular.woff'),
+        url('./../../fonts/AvenirNextCyr-Regular.ttf'),
+        url('./../../fonts/AvenirNextCyr-Regular.eot');
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    font-style: normal;
+    font-weight: 500;
+    src: 
+        local('Avenir Next Medium'),
+        url('./../../fonts/AvenirNextCyr-Medium.woff'),
+        url('./../../fonts/AvenirNextCyr-Medium.ttf'),
+        url('./../../fonts/AvenirNextCyr-Medium.eot');
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    font-style: normal;
+    font-weight: 600;
+    src: 
+        local('Avenir Next DemiBold'),
+        url('./../../fonts/AvenirNextCyr-Demi.woff'),
+        url('./../../fonts/AvenirNextCyr-Demi.ttf'),
+        url('./../../fonts/AvenirNextCyr-Demi.eot');
+}
+
+@font-face {
+    font-family: 'Avenir Next';
+    font-style: normal;
+    font-weight: 700;
+    src: 
+        local('Avenir Next Bold'),
+        url('./../../fonts/AvenirNextCyr-Bold.woff'),
+        url('./../../fonts/AvenirNextCyr-Bold.ttf'),
+        url('./../../fonts/AvenirNextCyr-Bold.eot');
+}
+*/

@@ -1,0 +1,25 @@
+/*!
+Theme Name: Project Name
+*/
+
+// 1. Configuration and helpers
+@import 'abstracts/variables';
+@import 'abstracts/functions';
+@import 'abstracts/mixins';
+@import 'abstracts/placeholders';
+
+// 2. Vendors
+//@import 'vendors/bootstrap';
+
+// 3. Base stuff
+@import 'base/fonts';
+@import 'base/reset';
+@import 'base/typography';
+@import 'base/page';
+
+// 4. Components
+@import 'components/footer';
+@import 'components/header';
+
+// 5. Page-specific styles
+//@import 'pages/index';

@@ -1,0 +1,75 @@
+/* *,
+*::before,
+*::after {
+    box-sizing: border-box;
+} */
+
+*:focus,
+*:active {
+    outline: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover {
+        color: inherit;
+    }
+}
+
+/* button {
+    -webkit-appearance: none;
+    background-color: transparent;
+    color: inherit;
+    border-width: 0;
+    padding: 0;
+    cursor: pointer;
+    user-select: none;
+} */
+
+img {
+    display: inline-block;
+    max-width: 100%;
+    width: 100%;
+    //height: auto;
+}
+
+/* figure {
+    margin: 0;
+} */
+
+input::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+ul, ol, dd {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0; 
+}
+
+b, strong {
+    font-weight: bold;
+}
+/* p {
+    margin: 0;
+} */
+
+fieldset {
+    border-width: 0;
+    padding: 0;
+    margin: 0;
+}

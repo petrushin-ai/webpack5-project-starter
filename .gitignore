@@ -1,0 +1,15 @@
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+.idea/
+.vscode/
+
+node_modules/
+
+theme/fonts/
+theme/html/
+theme/css/
+theme/images/
+theme/js/
+theme/*.css
