@@ -1,144 +1,11 @@
-const fs = require('fs');
 const path = require('path');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlBeautifyPlugin = require('@nurminen/html-beautify-webpack-plugin');
-const HtmlWebpackSkipAssetsPlugin = require('html-webpack-skip-assets-plugin').HtmlWebpackSkipAssetsPlugin;
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-const RemoveEmptyScriptsPlugin = require('webpack-remove-empty-scripts');
-const TerserPlugin = require("terser-webpack-plugin");
+const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
 const isDev = process.env.WEBPACK_SERVE;
 
-function entryPoints(dir) {
-    let entry_points = {
-        style: './src/scss/style.scss'
-    };
-
-    function each_file(dir) {
-        try {
-            fs.readdirSync(dir, {withFileTypes: true}).forEach(function(item) {
-                const file = item.name;
-                const parts = file.split('.');
-                if (parts[1] !== 'js') return;
-                var file_path = dir + '/' + file;
-                entry_points[parts[0]] = file_path;
-            });
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    each_file(dir);
-
-    return entry_points;
-}
-
-function generateHtmlPlugins(templateDir) {
-    const templateFiles = fs.readdirSync(path.resolve(__dirname, templateDir), {withFileTypes: true});
-
-    return templateFiles.reduce((result, item) => {
-        const parts = item.name.split('.');
-        const name = parts[0];
-        const extension = parts[1];
-
-        if (extension === 'html') result.push(
-            new HtmlWebpackPlugin({
-                filename: path.resolve(__dirname, `./theme/html/${name}.html`),
-                template: path.resolve(__dirname, `${templateDir}/${name}.${extension}`),
-                chunks: ['style', 'vendors', 'global', name],
-                chunksSortMode: 'manual',
-                excludeAssets: 'style.js'
-            })
-        );
-       
-        return result;
-    }, []);
-}
-
-function plugins() {
-    let plugins = [...generateHtmlPlugins('./src/pages/')];
-
-    if (isDev) {
-        plugins.push(new webpack.HotModuleReplacementPlugin());
-    } else {
-        plugins = [
-            ...plugins,
-            new HtmlBeautifyPlugin({
-                config: {
-                    html: {
-                        end_with_newline: true,
-                        indent_size: 4,
-                        indent_with_tabs: true,
-                        indent_inner_html: true,
-                        preserve_newlines: true,
-                        unformatted: ['strong', 'i', 'b'],
-                        inline: []
-                    }
-                }
-            }),
-            new HtmlWebpackSkipAssetsPlugin({
-                excludeAssets: ['style.js']
-            }),
-            new RemoveEmptyScriptsPlugin(),
-            new MiniCssExtractPlugin({
-                filename: ({chunk}) => chunk.name === 'style' ? '[name].css' : 'css/[name].css'
-            })
-        ]
-    }
-    
-    return plugins;
-}
-
-function processNestedHtml(content, loaderContext) {
-    const INCLUDE_PATTERN = /\<include src=\"(.+)\"\/?\>(?:\<\/include\>)?/gi;
-    
-    return !INCLUDE_PATTERN.test(content) 
-    ? content 
-    : content.replace(INCLUDE_PATTERN, (m, src) => {
-        const pathToPartial = path.resolve(loaderContext.context, src);
-        loaderContext.addDependency(pathToPartial);
-        return processNestedHtml(fs.readFileSync(pathToPartial, 'utf8'), {...loaderContext, context: path.dirname(pathToPartial)});
-    });
-}
-
-function styleLoaders() {
-    if (isDev) {
-        return [
-            "style-loader",
-            "css-loader",
-            "resolve-url-loader",
-            {
-                loader: "sass-loader",
-                options: {
-                    sourceMap: true, // <-- !!IMPORTANT!! for "resolve-url-loader"
-                }
-            }
-        ]
-    }
-
-    return [
-        MiniCssExtractPlugin.loader,
-        "css-loader",
-        "postcss-loader",
-        "resolve-url-loader",
-        {
-            loader: "sass-loader",
-            options: {
-                sourceMap: true, // <-- !!IMPORTANT!! for "resolve-url-loader"
-            }
-        }
-    ]
-}
-
-
 module.exports = {
-    entry: entryPoints('./src/js'),
-
     output: {
-		filename: 'js/[name].js',
-		path: path.resolve(__dirname, './theme'),
+        path: path.resolve(__dirname, './theme'),
         assetModuleFilename: 'images/[name][ext]',
         clean: isDev ? false : {
             keep(asset) {
@@ -146,9 +13,42 @@ module.exports = {
                 return !targets.some(v => asset.includes(v));
             }
         }
-	},
+    },
 
-    plugins: plugins(),
+    resolve: {
+        alias: {
+            // aliases used in template for source assets
+            '@scripts': path.join(__dirname, 'src/js'),
+            '@styles': path.join(__dirname, 'src/scss'),
+            '@images': path.join(__dirname, 'src/images'),
+            '@fonts': path.join(__dirname, 'src/fonts'),
+        }
+    },
+
+    plugins: [
+        new HtmlBundlerPlugin({
+            // define a relative or absolute path to entry templates
+            // note: the partials dir must be outside the pages
+            entry: 'src/views/pages/',
+            outputPath: path.resolve(__dirname, './theme/html'),
+            js: {
+                // output filename of compiled JavaScript, used if `inline` option is false (defaults)
+                filename: 'js/[name].[contenthash:8].js',
+                //inline: true, // inlines JS into HTML
+            },
+            css: {
+                // output filename of extracted CSS, used if `inline` option is false (defaults)
+                //filename: 'css/[name].[contenthash:8].css',
+                filename: ({chunk}) => chunk.name === 'style' ? '[name].[contenthash:8].css' : 'css/[name].[contenthash:8].css'
+                //inline: true, // inlines CSS into HTML
+            },
+            preprocessor: 'eta', // use the template engine
+            preprocessorOptions: {
+                views: 'src/views', // path for includes in template
+            },
+            minify: 'auto', // minify html in production mode only
+        }),
+    ],
 
     externals: {
 		jquery: 'jQuery',
@@ -157,18 +57,12 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.html$/i,
-                use: {
-                    loader: 'html-loader',
-                    options: {
-                        minimize: false,
-                        preprocessor: processNestedHtml
-                    }
-                } 
-            },
-            {
                 test: /\.s[ac]ss|\.css/i,
-                use: styleLoaders()
+                use: [
+                    "css-loader",
+                    isDev ? null : "postcss-loader",
+                    "sass-loader", // minimizes generated CSS in production mode
+                ]
             },
             {
                 test: /\.js$/i,
@@ -181,7 +75,7 @@ module.exports = {
                 }
             },
             {
-                test: /\.(png|jpg|gif)$/i,
+                test: /\.(png|jpg|gif|ico)$/i,
                 type: 'asset/resource',
                 use: isDev ? void(0) : 'image-webpack-loader' 
             },
@@ -210,7 +104,7 @@ module.exports = {
             directory: path.join(__dirname, './theme/html'),
         },
         watchFiles: ['src/pages/**/*'],
-        hot: true,     
+        hot: true,
         host: '0.0.0.0',
         port: 8080
     },
@@ -219,19 +113,11 @@ module.exports = {
         splitChunks: {
             cacheGroups: {
                 commons: {
-                    test: /[\\/]node_modules[\\/]/,
+                    test: /[\\/]node_modules[\\/].+\.(js|ts)$/, // split js only
                     name: 'vendors',
-                    chunks (chunk) {
-                        // exclude `style`
-                        return chunk.name !== 'style';
-                    }
                 }
             }
         },
-        minimizer: [
-            new CssMinimizerPlugin(),
-            new TerserPlugin({ extractComments: false })
-        ],
         runtimeChunk: 'single'
     }
 };

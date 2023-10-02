@@ -26,7 +26,7 @@
 
 2. Разработка:
 
-    > `npm run dev`
+    > `npm start`
 
     devServer со html страницами будет доступен по адресу 
     http://localhost:8080/html/
